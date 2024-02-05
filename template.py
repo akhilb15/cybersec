@@ -7,7 +7,7 @@ exe = ELF('./path/to/binary')
 host = 'chal.sigpwny.com'
 port = 1337
 
-# libc = ELF('./path/to/libc')
+libc = ELF('./path/to/libc')
 # rop = ROP(exe)
 
 context.arch = 'amd64'
@@ -19,16 +19,23 @@ context.binary = exe
 # Run without randomization
 # python3 solve.py GDB NOASLR
 
+# To get libc and linker:
+# ldd $(which ls) in docker
+# docker cp the files
+
+
 
 
 def conn(argv=[], *a, **kw):
     '''Start the exploit against the target.'''
     if args.GDB:
-        return gdb.debug([exe.path] + argv, gdbscript=gdbscript, *a, **kw)
+        return gdb.debug([exe.path] + argv, gdbscript=gdbscript, *a, **kw, env={"LD_PRELOAD": libc.path})
+        # return gdb.debug([exe.path] + argv, gdbscript=gdbscript, *a, **kw)
     elif args.REMOTE:
         return remote(host, port)
     else:
-        return process([exe] + argv, *a, **kw)
+        return process([exe.path] + argv, *a, **kw, env={"LD_PRELOAD": libc.path})
+        # return process([exe.path] + argv, *a, **kw)
 
 gdbscript = '''
 b *main
