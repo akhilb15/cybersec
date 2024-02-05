@@ -1,2 +1,2 @@
 # cybersec
-ctf scripts!
+ctf stuff!
