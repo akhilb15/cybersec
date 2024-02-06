@@ -3,17 +3,20 @@
 from pwn import *
 
 
-exe = ELF('./path/to/binary')
+# exe = ELF('./chal')
+# libc = ELF('./path/to/libc')
+# ld = ELF('./path/to/ld')
+
+{bindings} # for pwninit, replaces above
+
 host = 'chal.sigpwny.com'
 port = 1337
 
-libc = ELF('./path/to/libc')
-# rop = ROP(exe)
-
 context.arch = 'amd64'
-context.terminal = ['tmux', 'splitw', '-h']
-context.binary = exe
+context.terminal = ['tmux', 'splitw', '-f', '-h']
+context.binary = {bin_name}
 
+# rop = ROP(exe)
 
 
 # Run without randomization
@@ -24,18 +27,14 @@ context.binary = exe
 # docker cp the files
 
 
-
-
 def conn(argv=[], *a, **kw):
     '''Start the exploit against the target.'''
     if args.GDB:
-        return gdb.debug([exe.path] + argv, gdbscript=gdbscript, *a, **kw, env={"LD_PRELOAD": libc.path})
-        # return gdb.debug([exe.path] + argv, gdbscript=gdbscript, *a, **kw)
+        return gdb.debug({proc_args}, gdbscript=gdbscript, *a, **kw)
     elif args.REMOTE:
         return remote(host, port)
     else:
-        return process([exe.path] + argv, *a, **kw, env={"LD_PRELOAD": libc.path})
-        # return process([exe.path] + argv, *a, **kw)
+        return process({proc_args}, *a, **kw)
 
 gdbscript = '''
 b *main
@@ -48,14 +47,7 @@ b *main
 def solve():
     io = conn()
 
-    # shellcode = asm(shellcraft.sh())
-    # payload = fit({
-    #     32: 0xdeadbeef,
-    #     'iaaa': [1, 2, 'Hello', 3]
-    # }, length=128)
-    # io.send(payload)
-    # flag = io.recv(...)
-    # log.success(flag)
+    # exploit code here
 
     io.interactive()
     
